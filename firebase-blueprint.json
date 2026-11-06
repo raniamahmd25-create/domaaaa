@@ -1,0 +1,117 @@
+{
+  "entities": {
+    "users": {
+      "title": "UserProfile",
+      "description": "User profile with role, email, and preferences",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 100 },
+        "email": { "type": "string", "maxLength": 200 },
+        "role": { "type": "string", "enum": ["student", "teacher", "parent"] },
+        "grade": { "type": "string", "maxLength": 100 },
+        "avatarColor": { "type": "string", "maxLength": 100 },
+        "createdAt": { "type": "string", "maxLength": 50 },
+        "updatedAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "name", "role", "avatarColor"]
+    },
+    "documents": {
+      "title": "StudyDocument",
+      "description": "Study booklet, revision, or book document metadata and content",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 200 },
+        "subject": { "type": "string", "maxLength": 50 },
+        "customSubjectName": { "type": "string", "maxLength": 100 },
+        "docType": { "type": "string", "maxLength": 50 },
+        "format": { "type": "string", "maxLength": 50 },
+        "grade": { "type": "string", "maxLength": 100 },
+        "term": { "type": "string", "maxLength": 50 },
+        "author": { "type": "string", "maxLength": 100 },
+        "description": { "type": "string", "maxLength": 2000 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "maxLength": 50 },
+        "updatedAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "title", "subject", "docType", "grade", "term", "author", "userId", "createdAt", "updatedAt"]
+    },
+    "reminders": {
+      "title": "StudyReminder",
+      "description": "Study schedule reminder for a specific subject",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "subjectId": { "type": "string", "maxLength": 50 },
+        "customSubjectName": { "type": "string", "maxLength": 100 },
+        "title": { "type": "string", "maxLength": 200 },
+        "targetDate": { "type": "string", "maxLength": 20 },
+        "targetTime": { "type": "string", "maxLength": 10 },
+        "repeatType": { "type": "string", "enum": ["once", "daily", "weekdays", "custom"] },
+        "priority": { "type": "string", "enum": ["normal", "medium", "high"] },
+        "isActive": { "type": "boolean" },
+        "isCompleted": { "type": "boolean" },
+        "createdAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "userId", "subjectId", "title", "targetDate", "targetTime", "repeatType", "priority", "isActive", "isCompleted", "createdAt"]
+    },
+    "notes": {
+      "title": "DocumentQuickNote",
+      "description": "Student quick study text notes associated with a document",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "docId": { "type": "string", "maxLength": 128 },
+        "content": { "type": "string", "maxLength": 5000 },
+        "pageNumber": { "type": "number" },
+        "color": { "type": "string", "maxLength": 30 },
+        "createdAt": { "type": "string", "maxLength": 50 },
+        "updatedAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "userId", "docId", "content", "createdAt", "updatedAt"]
+    },
+    "comments": {
+      "title": "InteractiveComment",
+      "description": "Student interactive inquiry or comment on a video or document",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "targetId": { "type": "string", "maxLength": 128 },
+        "targetType": { "type": "string", "enum": ["video", "document"] },
+        "userId": { "type": "string", "maxLength": 128 },
+        "userName": { "type": "string", "maxLength": 100 },
+        "userPhotoURL": { "type": "string", "maxLength": 1000000 },
+        "role": { "type": "string", "enum": ["student", "teacher", "parent"] },
+        "content": { "type": "string", "maxLength": 2000 },
+        "likesCount": { "type": "number" },
+        "createdAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "targetId", "targetType", "userId", "userName", "content", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "users",
+      "description": "User profile document keyed by user authentication UID"
+    },
+    "/users/{userId}/notes/{noteId}": {
+      "schema": "notes",
+      "description": "Quick text notes for study documents created by user"
+    },
+    "/documents/{documentId}": {
+      "schema": "documents",
+      "description": "Published or shared study documents and booklets"
+    },
+    "/reminders/{reminderId}": {
+      "schema": "reminders",
+      "description": "User scheduled study reminders and subject alerts"
+    },
+    "/comments/{commentId}": {
+      "schema": "comments",
+      "description": "Interactive inquiries and comments on videos or documents"
+    }
+  }
+}

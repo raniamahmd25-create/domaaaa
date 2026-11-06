@@ -1,0 +1,6 @@
+{
+  "name": "منصة قلمي التعليمية - الصف الخامس الابتدائي",
+  "description": "منصة متكاملة لنشر ومذاكرة المذكرات، الكتب، الملازم، والمراجعات المقررة للصف الخامس الابتدائي مع قلم إلكتروني متطور وتبويبات ذكية.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

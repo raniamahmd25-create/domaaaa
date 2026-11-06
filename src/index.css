@@ -1,0 +1,169 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ═══════════════════════════════════════════════════════════
+   قواعد وهيكل CSS الدلالي لعناصر HTML5 في منصة قلمي
+   ═══════════════════════════════════════════════════════════ */
+
+/* أنماط القوائم الدلالية */
+ul[role="list"], ol[role="list"] {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* تنسيقات حقول النماذج ومجموعات البحث */
+fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+legend {
+  font-weight: 800;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+/* بطاقات المقالات الدلالية */
+article.semantic-card {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+article.semantic-card:hover {
+  transform: translateY(-4px);
+}
+
+/* بطاقات المذكرات مع تأثير حركي انسيابي عند التمرير */
+.doc-card {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.25s ease-out;
+  will-change: transform, box-shadow;
+}
+
+.doc-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 35px -10px rgba(245, 158, 11, 0.2), 0 8px 16px -4px rgba(0, 0, 0, 0.06);
+}
+
+/* الصور والشعارات المصغرة */
+figure.semantic-figure {
+  margin: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+/* شريط التقدم الدلالي HTML5 Progress & Meter */
+progress.semantic-progress {
+  appearance: none;
+  border: none;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+progress.semantic-progress::-webkit-progress-bar {
+  background-color: rgba(226, 232, 240, 0.8);
+}
+
+progress.semantic-progress::-webkit-progress-value {
+  background: linear-gradient(90deg, #f59e0b, #f97316);
+  border-radius: 9999px;
+}
+
+/* تفاصيل وأكورديون HTML5 الدلالي */
+details.semantic-accordion summary {
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+}
+
+details.semantic-accordion summary::-webkit-details-marker {
+  display: none;
+}
+
+/* High-Quality Educational & Academic Print Styles */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 8mm;
+  }
+
+  /* Automatically hide pen tools, AI widgets, buttons, modals, and navbars */
+  button, 
+  [role="button"],
+  input, 
+  select, 
+  textarea, 
+  nav, 
+  aside, 
+  .no-print, 
+  [class*="print:hidden"],
+  [role="toolbar"], 
+  .pen-toolbar,
+  .ai-tutor-sidebar,
+  .floating-widget,
+  .camera-control,
+  .settings-modal,
+  .lateral-flipper,
+  .page-nav-bar,
+  .audio-explanation-modal,
+  .notification-modal {
+    display: none !important;
+  }
+
+  body, html, #root {
+    background: #ffffff !important;
+    color: #000000 !important;
+    overflow: visible !important;
+    height: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    font-family: 'Cairo', sans-serif !important;
+  }
+
+  /* Reset layout constraints so all pages can print continuously */
+  .fixed, .relative, .absolute {
+    position: static !important;
+  }
+
+  .h-screen, .max-h-screen, .overflow-hidden, .overflow-auto {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  /* Reset color modes, shadows, and invert filters */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+    filter: none !important;
+  }
+
+  /* Academic Printable Sheet Layout */
+  .print-page-sheet {
+    page-break-after: always !important;
+    break-after: page !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto 20px auto !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+  }
+
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+    page-break-inside: avoid;
+    display: block;
+    margin: 0 auto;
+  }
+
+  canvas {
+    max-width: 100% !important;
+    height: auto !important;
+    page-break-inside: avoid;
+  }
+}

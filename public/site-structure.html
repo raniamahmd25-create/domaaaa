@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>هيكل موقع منصة قلمي التعليمية - HTML5 & CSS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    /* ═══════════════════════════════════════════════════════════
+       هيكل وقواعد CSS الأساسية لمنصة قلمي التعليمية
+       ═══════════════════════════════════════════════════════════ */
+    :root {
+      --font-cairo: 'Cairo', system-ui, -apple-system, sans-serif;
+      --bg-light: #f8fafc;
+      --bg-card: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --primary-amber: #f59e0b;
+      --primary-amber-hover: #d97706;
+      --primary-orange: #f97316;
+      --accent-emerald: #10b981;
+      --accent-rose: #f43f5e;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-xl: 28px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-cairo);
+      background-color: var(--bg-light);
+      color: var(--text-main);
+      line-height: 1.6;
+      direction: rtl;
+      text-align: right;
+    }
+
+    /* كبسولة التنبيه العلوية */
+    .view-mode-banner {
+      background: #0f172a;
+      color: #ffffff;
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid var(--primary-amber);
+    }
+    .view-mode-banner a {
+      color: var(--primary-amber);
+      text-decoration: none;
+      font-weight: 800;
+    }
+
+    /* رأس الصفحة والقائمة الرئيسية */
+    header.site-header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+    }
+    .header-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 20px;
+      height: 70px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-logo-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--primary-amber), var(--primary-orange));
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 20px;
+    }
+    .brand-titles h1 {
+      font-size: 18px;
+      font-weight: 900;
+      margin: 0;
+      line-height: 1.2;
+    }
+    .brand-titles h1 span {
+      color: var(--primary-amber);
+    }
+    .grade-badge {
+      display: inline-block;
+      font-size: 10.5px;
+      padding: 2px 8px;
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fde68a;
+      border-radius: 9999px;
+      font-weight: 800;
+      margin-right: 6px;
+    }
+    .brand-titles p {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* شريط أدوات التنقل */
+    nav.site-nav {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: var(--radius-md);
+      font-size: 12px;
+      font-weight: 800;
+      font-family: inherit;
+      cursor: pointer;
+      border: 1px solid var(--border-color);
+      background: #ffffff;
+      color: var(--text-main);
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    .nav-btn:hover {
+      background: #f1f5f9;
+    }
+    .nav-btn.primary {
+      background: linear-gradient(to right, var(--primary-amber), var(--primary-orange));
+      color: #0f172a;
+      border: none;
+      box-shadow: var(--shadow-sm);
+    }
+    .nav-btn.primary:hover {
+      filter: brightness(1.05);
+    }
+
+    /* مساحة المحتوى الرئيسية */
+    main.page-main-layout {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 32px 20px;
+    }
+
+    /* 1. قسم الترحيب الرئيسي للمكتبة */
+    section.hero-banner {
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      padding: 24px 28px;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .hero-info {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .hero-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, var(--primary-amber), var(--primary-orange));
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      font-weight: 900;
+    }
+    .hero-title h2 {
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--text-main);
+    }
+    .hero-title p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* 2. شريط الإشعارات الجانبي / العلوي */
+    aside.alerts-banner {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(249, 115, 22, 0.08));
+      border: 2px solid #fcd34d;
+      border-radius: var(--radius-xl);
+      padding: 18px 24px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .alerts-text {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .alerts-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--primary-amber), var(--primary-orange));
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    /* 3. صندوق البحث وتصفية المواد */
+    section.search-filters-section {
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      padding: 22px;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 28px;
+    }
+    .search-input-box {
+      position: relative;
+      margin-bottom: 16px;
+    }
+    .search-input-box input {
+      width: 100%;
+      padding: 12px 18px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      font-size: 13px;
+      font-family: inherit;
+      background: #f8fafc;
+      color: var(--text-main);
+      outline: none;
+    }
+    .search-input-box input:focus {
+      border-color: var(--primary-amber);
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+    }
+    .chips-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .chip {
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid var(--border-color);
+      background: #f1f5f9;
+      color: var(--text-muted);
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .chip.active {
+      background: var(--primary-amber);
+      color: #0f172a;
+      border-color: var(--primary-amber);
+    }
+
+    /* 4. شبكة بطاقات المذكرات والكتب */
+    section.documents-grid-section {
+      margin-top: 24px;
+    }
+    .section-heading {
+      font-size: 16px;
+      font-weight: 900;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .documents-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 24px;
+    }
+
+    /* بطاقة المذكرة الدلالية (Semantic Article) */
+    article.doc-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-col;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    article.doc-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+    .publisher-bar {
+      padding: 10px 16px;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .publisher-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .publisher-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-amber), var(--primary-orange));
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 900;
+    }
+    figure.doc-thumbnail {
+      position: relative;
+      height: 180px;
+      background: #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    figure.doc-thumbnail img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .doc-badge-overlay {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #0f172a;
+      color: #ffffff;
+      padding: 3px 8px;
+      border-radius: 9999px;
+      font-size: 10px;
+      font-weight: 800;
+    }
+    .doc-body {
+      padding: 16px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .doc-body h3 {
+      font-size: 15px;
+      font-weight: 900;
+      margin-bottom: 6px;
+      color: var(--text-main);
+    }
+    .doc-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+    .doc-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      border-top: 1px solid var(--border-color);
+      padding-top: 12px;
+    }
+    .open-doc-btn {
+      flex: 1;
+      text-align: center;
+      background: #0f172a;
+      color: #ffffff;
+      padding: 8px;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .open-doc-btn:hover {
+      background: #1e293b;
+    }
+
+    /* 5. تذييل الموقع الدلالي */
+    footer.site-footer {
+      margin-top: 60px;
+      padding: 30px 20px 40px;
+      border-top: 1px solid var(--border-color);
+      background: #ffffff;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .footer-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- شريط تنقل علوي تعريفي بالهيكل -->
+  <aside class="view-mode-banner">
+    <div>⚡ هيكل الموقع الدلالي بصيغة HTML5 & CSS النقية (W3C Standards)</div>
+    <div><a href="/" target="_self">← العودة للتطبيق المباشر</a></div>
+  </aside>
+
+  <!-- رأس الموقع الدلالي (Header) -->
+  <header class="site-header" role="banner">
+    <div class="header-container">
+      <!-- الشعار وهوية المرحلة الدراسية -->
+      <div class="brand-section">
+        <div class="brand-logo-icon">✍️</div>
+        <div class="brand-titles">
+          <h1>منصة <span>قلمي</span> التعليمية <span class="grade-badge">الصف الخامس الابتدائي</span></h1>
+          <p>مكتبة المذكرات والكتب والملازم مع القلم الإلكتروني الذكي</p>
+        </div>
+      </div>
+
+      <!-- قائمة وروابط التنقل الرئيسية (Semantic Nav) -->
+      <nav class="site-nav" aria-label="شريط أدوات المنصة">
+        <button class="nav-btn" type="button">🔔 إشعارات المذاكرة</button>
+        <button class="nav-btn" type="button">📊 التقدم الأسبوعي</button>
+        <button class="nav-btn primary" type="button">➕ نشر كتاب أو ملزمة</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- مساحة المحتوى الرئيسية (Main Layout) -->
+  <main class="page-main-layout" role="main">
+
+    <!-- 1. ترويسة المكتبة للصف الخامس -->
+    <section class="hero-banner" aria-labelledby="hero-title-h2">
+      <div class="hero-info">
+        <div class="hero-icon">🎓</div>
+        <div class="hero-title">
+          <h2 id="hero-title-h2">مكتبة الصف الخامس الابتدائي</h2>
+          <p>جميع الكتب والملازم ونماذج الامتحانات والمراجعات المقررة لمنهج الصف الخامس الابتدائي</p>
+        </div>
+      </div>
+      <div>
+        <button class="nav-btn primary" type="button">➕ نشر ملزمة أو كتاب جديد</button>
+      </div>
+    </section>
+
+    <!-- 2. شريط التنبيهات والإشعارات (Semantic Aside) -->
+    <aside class="alerts-banner" aria-label="تنبيهات إشعارات المذاكرة">
+      <div class="alerts-text">
+        <div class="alerts-icon">🔔</div>
+        <div>
+          <strong style="font-size: 14px;">تفعيل إشعارات الموقع للمذاكرة اليومية</strong>
+          <p style="font-size: 12px; color: #475569; margin-top: 2px;">
+            احصل على تنبيهات صوتية ومباشرة على شاشتك بمواعيد مراجعة المواد الدراسية، واختبارات الشهور.
+          </p>
+        </div>
+      </div>
+      <div>
+        <button class="nav-btn primary" type="button">تفعيل إشعارات الموقع الآن 🔔</button>
+      </div>
+    </aside>
+
+    <!-- 3. قسم البحث وتصفية المواد (Search & Filter Section) -->
+    <section class="search-filters-section" aria-label="أدوات البحث وتصفية المواد">
+      <div class="search-input-box">
+        <input type="search" placeholder="ابحث بالاسم، المادة، المعلم، أو الكلمات المفتاحية..." aria-label="ابحث في مذكرات الصف الخامس">
+      </div>
+      <div class="chips-group">
+        <a href="#all" class="chip active">جميع المواد</a>
+        <a href="#arabic" class="chip">لغة عربية</a>
+        <a href="#math" class="chip">رياضيات</a>
+        <a href="#science" class="chip">علوم</a>
+        <a href="#social" class="chip">دراسات اجتماعية</a>
+        <a href="#english" class="chip">Connect 5</a>
+        <a href="#religion" class="chip">تربية دينية</a>
+      </div>
+    </section>
+
+    <!-- 4. شبكة المذكرات والكتب (Documents Grid Section) -->
+    <section class="documents-grid-section" aria-label="قائمة المذكرات والكتب">
+      <h2 class="section-heading">📚 المذكرات والكتب الدراسية المتاحة</h2>
+      
+      <div class="documents-grid">
+        <!-- كارت المذكرة الأولى (Article) -->
+        <article class="doc-card" aria-label="مذكرة اللغة العربية الشاملة">
+          <div class="publisher-bar">
+            <div class="publisher-info">
+              <div class="publisher-avatar">م</div>
+              <span>أستاذ محمد أحمد (معلم لغة عربية)</span>
+            </div>
+            <span>مشترك ✓</span>
+          </div>
+
+          <figure class="doc-thumbnail">
+            <img src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&auto=format&fit=crop&q=80" alt="غلاف مذكرة اللغة العربية">
+            <span class="doc-badge-overlay">لغة عربية</span>
+          </figure>
+
+          <div class="doc-body">
+            <h3>كتاب الامتحان والشرح - لغة عربية الصف الخامس</h3>
+            <p class="doc-meta">الصف الخامس الابتدائي • 12 صفحة • ملف PDF</p>
+            <div class="doc-actions">
+              <a href="/" class="open-doc-btn">فتح في القارئ مع القلم ✏️</a>
+            </div>
+          </div>
+        </article>
+
+        <!-- كارت المذكرة الثانية (Article) -->
+        <article class="doc-card" aria-label="مذكرة الرياضيات">
+          <div class="publisher-bar">
+            <div class="publisher-info">
+              <div class="publisher-avatar">س</div>
+              <span>أستاذة سارة محمود (معلمة رياضيات)</span>
+            </div>
+            <span>مشترك ✓</span>
+          </div>
+
+          <figure class="doc-thumbnail">
+            <img src="https://images.unsplash.com/photo-1509228468518-180dd4864904?w=600&auto=format&fit=crop&q=80" alt="غلاف مذكرة الرياضيات">
+            <span class="doc-badge-overlay">رياضيات</span>
+          </figure>
+
+          <div class="doc-body">
+            <h3>مراجعة ليلة الامتحان والمسائل النموذجية - رياضيات</h3>
+            <p class="doc-meta">الصف الخامس الابتدائي • 8 صفحات • ملف PDF</p>
+            <div class="doc-actions">
+              <a href="/" class="open-doc-btn">فتح في القارئ مع القلم ✏️</a>
+            </div>
+          </div>
+        </article>
+
+        <!-- كارت المذكرة الثالثة (Article) -->
+        <article class="doc-card" aria-label="كتاب العلوم التفاعلي">
+          <div class="publisher-bar">
+            <div class="publisher-info">
+              <div class="publisher-avatar">ع</div>
+              <span>أستاذ علي كمال (معلم علوم)</span>
+            </div>
+            <span>مشترك ✓</span>
+          </div>
+
+          <figure class="doc-thumbnail">
+            <img src="https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=600&auto=format&fit=crop&q=80" alt="غلاف مذكرة العلوم">
+            <span class="doc-badge-overlay">علوم</span>
+          </figure>
+
+          <div class="doc-body">
+            <h3>المفاهيم العلمية والتجارب المقررة - علوم</h3>
+            <p class="doc-meta">الصف الخامس الابتدائي • 15 صفحة • صور ومسح ضوئي</p>
+            <div class="doc-actions">
+              <a href="/" class="open-doc-btn">فتح في القارئ مع القلم ✏️</a>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- تذييل الصفحة الدلالي (Footer) -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="footer-container">
+      <div>
+        <strong>منصة قلمي التعليمية</strong> • الصف الخامس الابتدائي
+      </div>
+      <div>
+        هيكل المنصة مبني وفق معايير W3C HTML5 و CSS الحديثة لتجربة تعليمية سلسة وسريعة
+      </div>
+      <div>
+        <a href="/" style="color: var(--primary-amber); text-decoration: none; font-weight: bold;">تطبيق منصة قلمي التفاعلي ↗</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

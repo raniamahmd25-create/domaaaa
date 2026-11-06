@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>منصة قلمي التعليمية - المذكرات والشروحات الذكية</title>
+  <!-- ربط ملف التنسيقات scrip.css -->
+  <link rel="stylesheet" href="scrip.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- شريط التنقل العلوي -->
+  <header class="header-navbar">
+    <div class="brand-wrapper">
+      <div class="brand-icon">✏️</div>
+      <div>
+        <div class="brand-title">
+          <span>منصة قلمي</span>
+          <span class="brand-badge">5 ابتدائي</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="navbar-actions">
+      <!-- أزرار تحميل الملفات الثلاثة المطلوبة -->
+      <a href="index.html" download="index.html" class="btn-nav download" title="تحميل ملف index.html">
+        📥 تحميل index.html
+      </a>
+      <a href="scrip.css" download="scrip.css" class="btn-nav download" title="تحميل ملف scrip.css">
+        🎨 تحميل scrip.css
+      </a>
+      <a href="script.js" download="script.js" class="btn-nav download" title="تحميل ملف script.js">
+        ⚡ تحميل script.js
+      </a>
+      <button type="button" id="themeToggleBtn" class="btn-nav">
+        🌙 وضع ليل
+      </button>
+    </div>
+  </header>
+
+  <!-- الحاوية الرئيسية -->
+  <main class="main-app-container">
+    
+    <!-- بطاقة الترحيب وتحميل الملفات -->
+    <section class="hero-card">
+      <div class="hero-content">
+        <div class="hero-avatar">🎓</div>
+        <div class="hero-text">
+          <h1>مكتبة الصف الخامس الابتدائي الذكية</h1>
+          <p>جميع مذكرات المنهج، فيديوهات Shorts، الدروس التعليمية، وبنك الأسئلة مع القلم الإلكتروني</p>
+        </div>
+      </div>
+      <div>
+        <button type="button" class="btn-nav primary" onclick="alert('قم بتحميل الملفات الثلاثة من الأزرار بالأعلى أو الأسفل!')">
+          ✨ ملفات الموقع كاملة جاهزة للتحميل
+        </button>
+      </div>
+    </section>
+
+    <!-- صندوق تحميل الملفات الثلاثة المباشر -->
+    <section style="background: var(--bg-card); border-radius: var(--radius-lg); padding: 20px; border: 1px solid var(--border-color); margin-bottom: 24px;">
+      <h2 style="font-size: 16px; font-weight: 900; margin-bottom: 12px; color: var(--text-primary);">
+        📦 الملفات الثلاثة المطلوبة للتحميل (اضغط للتحميل الفوري):
+      </h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px;">
+        <div class="download-box">
+          <div class="download-file-info">
+            <div class="file-ext-icon">HTML</div>
+            <div>
+              <strong style="display: block; font-size: 13px;">index.html</strong>
+              <span style="font-size: 11px; color: var(--text-muted);">الهيكل والصفحة الرئيسية</span>
+            </div>
+          </div>
+          <a href="index.html" download="index.html" class="btn-nav download" style="padding: 6px 12px;">تحميل 📥</a>
+        </div>
+
+        <div class="download-box">
+          <div class="download-file-info">
+            <div class="file-ext-icon css">CSS</div>
+            <div>
+              <strong style="display: block; font-size: 13px;">scrip.css</strong>
+              <span style="font-size: 11px; color: var(--text-muted);">التنسيقات والوضع الليلي</span>
+            </div>
+          </div>
+          <a href="scrip.css" download="scrip.css" class="btn-nav download" style="padding: 6px 12px;">تحميل 📥</a>
+        </div>
+
+        <div class="download-box">
+          <div class="download-file-info">
+            <div class="file-ext-icon js">JS</div>
+            <div>
+              <strong style="display: block; font-size: 13px;">script.js</strong>
+              <span style="font-size: 11px; color: var(--text-muted);">القلم والحفظ التفاعلي</span>
+            </div>
+          </div>
+          <a href="script.js" download="script.js" class="btn-nav download" style="padding: 6px 12px;">تحميل 📥</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- شاشة عارض القلم الإلكتروني الذكي -->
+    <section style="background: var(--bg-card); border-radius: var(--radius-xl); border: 1px solid var(--border-color); padding: 20px; margin-bottom: 24px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+        <div>
+          <h2 style="font-size: 16px; font-weight: 900;">🖊️ تجربة القلم الإلكتروني الذكي والحفظ التلقائي</h2>
+          <p style="font-size: 12px; color: var(--text-muted);">جرب الكتابة على المذكرة بالقلم وسيتم حفظ كتاباتك تلقائياً في localStorage</p>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button id="toolPen" class="tool-btn active" title="القلم">✏️</button>
+          <button id="toolEraser" class="tool-btn" title="الممحاة">🧹</button>
+          <button id="toolClear" class="tool-btn" title="مسح الكل">🗑️</button>
+          <button class="color-btn tool-btn" data-color="#f59e0b" style="background: #f59e0b;"></button>
+          <button class="color-btn tool-btn" data-color="#10b981" style="background: #10b981;"></button>
+          <button class="color-btn tool-btn" data-color="#3b82f6" style="background: #3b82f6;"></button>
+          <button class="color-btn tool-btn" data-color="#ef4444" style="background: #ef4444;"></button>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: center; background: #e2e8f0; border-radius: var(--radius-md); padding: 16px; overflow: hidden;">
+        <canvas id="electronicCanvas" width="750" height="420" style="background: #ffffff; border-radius: 8px; width: 100%; max-width: 750px; height: auto; touch-action: none;"></canvas>
+      </div>
+    </section>
+
+    <!-- قسم المذكرات (View 1) -->
+    <div id="viewDocuments" class="cards-grid">
+      <div class="doc-card">
+        <div class="doc-card-header">
+          <span class="doc-badge">اللغة العربية</span>
+          <span style="font-size: 11px; color: var(--text-muted);">⭐ 5.0</span>
+        </div>
+        <div class="doc-card-body">
+          <h3 class="doc-card-title">مذكرة النحو والقواعد الشاملة - الترم الثاني</h3>
+          <p class="doc-card-desc">شرح كامل لعلامات إعراب الفاعل والمفعول به مع تدريبات عملية وأمثلة محلولة.</p>
+        </div>
+        <div class="doc-card-footer">
+          <span>👨‍🏫 أ. أحمد ممدوح</span>
+          <span>12 صفحة 📄</span>
+        </div>
+      </div>
+
+      <div class="doc-card">
+        <div class="doc-card-header">
+          <span class="doc-badge" style="background: #dbeafe; color: #1d4ed8;">الرياضيات</span>
+          <span style="font-size: 11px; color: var(--text-muted);">⭐ 4.9</span>
+        </div>
+        <div class="doc-card-body">
+          <h3 class="doc-card-title">ملزمة الكسور الاعتيادية والعشرية</h3>
+          <p class="doc-card-desc">جمع وطرح الكسور متحدة ومختلفة المقام بنماذج توضيحية ورسومات هندسية.</p>
+        </div>
+        <div class="doc-card-footer">
+          <span>👩‍🏫 أ. سارة إبراهيم</span>
+          <span>18 صفحة 📄</span>
+        </div>
+      </div>
+
+      <div class="doc-card">
+        <div class="doc-card-header">
+          <span class="doc-badge" style="background: #dcfce7; color: #15803d;">العلوم</span>
+          <span style="font-size: 11px; color: var(--text-muted);">⭐ 5.0</span>
+        </div>
+        <div class="doc-card-body">
+          <h3 class="doc-card-title">المفهوم الأول: التفاعلات بين الغلاف الحيوي والمائي</h3>
+          <p class="doc-card-desc">تجارب عملية وشرح لأهمية المياه على سطح الأرض وحمايتها من التلوث.</p>
+        </div>
+        <div class="doc-card-footer">
+          <span>👨‍🏫 أ. محمد علي</span>
+          <span>15 صفحة 📄</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- قسم Shorts (View 2) -->
+    <div id="viewShorts" style="display: none; text-align: center; padding: 40px 20px;">
+      <h2 style="font-size: 18px; font-weight: 900; margin-bottom: 10px;">🎬 فيديوهات Shorts السريعة (تيك توك)</h2>
+      <p style="color: var(--text-muted); font-size: 13px;">مقاطع تعليمية رأسية سريعة أقل من 3 دقائق لمراجعة القوانين والأفكار الصعبة.</p>
+    </div>
+
+    <!-- قسم الدروس (View 3) -->
+    <div id="viewLessons" style="display: none; text-align: center; padding: 40px 20px;">
+      <h2 style="font-size: 18px; font-weight: 900; margin-bottom: 10px;">📺 الدروس والشروحات الكاملة (يوتيوب)</h2>
+      <p style="color: var(--text-muted); font-size: 13px;">شروحات فيديو مفصلة لوحدات المنهج مع التمارين التطبيقية.</p>
+    </div>
+
+    <!-- قسم الأسئلة التفاعلية (View 4) -->
+    <div id="viewQuizzes" style="display: none; text-align: center; padding: 40px 20px;">
+      <h2 style="font-size: 18px; font-weight: 900; margin-bottom: 10px;">📝 بنك الأسئلة والاختبارات التفاعلية</h2>
+      <p style="color: var(--text-muted); font-size: 13px;">أسئلة تفاعلية مع توقيت ذكي ونقاط لتشجيع الطلاب.</p>
+    </div>
+
+  </main>
+
+  <!-- شريط التنقل السفلي -->
+  <nav class="bottom-nav-bar">
+    <div class="bottom-nav-inner">
+      <button class="tab-btn active" data-tab="documents">
+        <span class="tab-icon">📚</span>
+        <span>المذكرات</span>
+      </button>
+      <button class="tab-btn" data-tab="shorts">
+        <span class="tab-icon">🎬</span>
+        <span>Shorts</span>
+      </button>
+      <button class="tab-btn" data-tab="lessons">
+        <span class="tab-icon">📺</span>
+        <span>الدروس</span>
+      </button>
+      <button class="tab-btn" data-tab="quizzes">
+        <span class="tab-icon">📝</span>
+        <span>أسئلة</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ربط ملف الجافاسكربت script.js -->
+  <script src="script.js"></script>
+</body>
+</html>

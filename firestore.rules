@@ -1,0 +1,171 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default-deny all unlisted paths
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // User Profile Validation
+    function isValidUser(data) {
+      return data.keys().hasAll(['id', 'name', 'role', 'avatarColor']) &&
+        data.keys().hasOnly(['id', 'name', 'role', 'grade', 'avatarColor', 'email', 'photoURL', 'bio', 'createdAt', 'updatedAt']) &&
+        data.id is string && data.id.size() <= 128 && data.id == request.auth.uid &&
+        data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+        data.role in ['student', 'teacher', 'parent'] &&
+        data.avatarColor is string && data.avatarColor.size() <= 100 &&
+        (!('email' in data) || (data.email is string && data.email.size() <= 200)) &&
+        (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() <= 1000000)) &&
+        (!('bio' in data) || (data.bio is string && data.bio.size() <= 1000)) &&
+        (!('grade' in data) || (data.grade is string && data.grade.size() <= 100));
+    }
+
+    // Document Validation
+    function isValidDocument(data) {
+      return data.keys().hasAll(['id', 'title', 'subject', 'docType', 'grade', 'term', 'author', 'userId', 'createdAt', 'updatedAt']) &&
+        data.id is string && data.id.size() <= 128 &&
+        data.title is string && data.title.size() > 0 && data.title.size() <= 200 &&
+        data.subject is string && data.subject.size() <= 50 &&
+        data.docType is string && data.docType.size() <= 50 &&
+        data.grade is string && data.grade.size() <= 100 &&
+        data.term is string && data.term.size() <= 50 &&
+        data.author is string && data.author.size() <= 100 &&
+        data.userId is string &&
+        (!('description' in data) || (data.description is string && data.description.size() <= 2000)) &&
+        (!('customSubjectName' in data) || (data.customSubjectName is string && data.customSubjectName.size() <= 100)) &&
+        (!('format' in data) || (data.format is string && data.format.size() <= 50)) &&
+        (!('averageRating' in data) || (data.averageRating is number)) &&
+        (!('ratingsCount' in data) || (data.ratingsCount is number)) &&
+        (!('comments' in data) || (data.comments is list));
+    }
+
+    // Reminder Validation
+    function isValidReminder(data) {
+      return data.keys().hasAll(['id', 'userId', 'subjectId', 'title', 'targetDate', 'targetTime', 'repeatType', 'priority', 'isActive', 'isCompleted', 'createdAt']) &&
+        data.id is string && data.id.size() <= 128 &&
+        data.userId is string && data.userId == request.auth.uid &&
+        data.subjectId is string && data.subjectId.size() <= 50 &&
+        data.title is string && data.title.size() > 0 && data.title.size() <= 200 &&
+        data.targetDate is string && data.targetDate.size() <= 20 &&
+        data.targetTime is string && data.targetTime.size() <= 10 &&
+        data.repeatType in ['once', 'daily', 'weekdays', 'custom'] &&
+        data.priority in ['normal', 'medium', 'high'] &&
+        data.isActive is bool &&
+        data.isCompleted is bool &&
+        (!('customSubjectName' in data) || (data.customSubjectName is string && data.customSubjectName.size() <= 100)) &&
+        (!('notes' in data) || (data.notes is string && data.notes.size() <= 1000)) &&
+        (!('linkedDocId' in data) || (data.linkedDocId is string && data.linkedDocId.size() <= 128)) &&
+        (!('linkedDocTitle' in data) || (data.linkedDocTitle is string && data.linkedDocTitle.size() <= 200));
+    }
+
+    // Quick Note Validation
+    function isValidNote(data) {
+      return data.keys().hasAll(['id', 'userId', 'docId', 'content', 'createdAt', 'updatedAt']) &&
+        data.keys().hasOnly(['id', 'userId', 'docId', 'content', 'pageNumber', 'color', 'createdAt', 'updatedAt']) &&
+        data.id is string && data.id.size() <= 128 &&
+        data.userId is string && data.userId == request.auth.uid &&
+        data.docId is string && data.docId.size() <= 128 &&
+        data.content is string && data.content.size() > 0 && data.content.size() <= 5000 &&
+        (!('pageNumber' in data) || (data.pageNumber is number)) &&
+        (!('color' in data) || (data.color is string && data.color.size() <= 30)) &&
+        data.createdAt is string && data.createdAt.size() <= 50 &&
+        data.updatedAt is string && data.updatedAt.size() <= 50;
+    }
+
+    // Interactive Comment Validation
+    function isValidComment(data) {
+      return data.keys().hasAll(['id', 'targetId', 'targetType', 'userId', 'userName', 'content', 'createdAt']) &&
+        data.keys().hasOnly(['id', 'targetId', 'targetType', 'userId', 'userName', 'userPhotoURL', 'role', 'content', 'likesCount', 'createdAt']) &&
+        data.id is string && data.id.size() <= 128 &&
+        data.targetId is string && data.targetId.size() <= 128 &&
+        data.targetType in ['video', 'document'] &&
+        data.userId is string && data.userId == request.auth.uid &&
+        data.userName is string && data.userName.size() > 0 && data.userName.size() <= 100 &&
+        data.content is string && data.content.size() > 0 && data.content.size() <= 2000 &&
+        (!('userPhotoURL' in data) || (data.userPhotoURL is string && data.userPhotoURL.size() <= 1000000)) &&
+        (!('role' in data) || (data.role in ['student', 'teacher', 'parent'])) &&
+        (!('likesCount' in data) || (data.likesCount is number)) &&
+        data.createdAt is string && data.createdAt.size() <= 50;
+    }
+
+    // Rules for Users collection
+    match /users/{userId} {
+      allow get: if isSignedIn() && isValidId(userId) && request.auth.uid == userId;
+      allow list: if false; // Blanket user listing forbidden for privacy
+      allow create: if isOwner(userId) && isValidId(userId) && isValidUser(incoming());
+      allow update: if isOwner(userId) && isValidId(userId) && isValidUser(incoming()) &&
+        incoming().id == existing().id;
+      allow delete: if isOwner(userId) && isValidId(userId);
+
+      // Student Quick Text Notes per document
+      match /notes/{noteId} {
+        allow get: if isOwner(userId) && isValidId(noteId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(noteId) && isValidNote(incoming()) && incoming().userId == userId;
+        allow update: if isOwner(userId) && isValidId(noteId) && isValidNote(incoming()) && incoming().userId == userId && incoming().createdAt == existing().createdAt;
+        allow delete: if isOwner(userId) && isValidId(noteId);
+      }
+    }
+
+    // Rules for Documents collection
+    match /documents/{documentId} {
+      allow get: if isValidId(documentId);
+      allow list: if true; // Public educational library browsing
+      allow create: if isSignedIn() && isValidId(documentId) && isValidDocument(incoming());
+      allow update: if isSignedIn() && isValidId(documentId) && isValidDocument(incoming()) &&
+        incoming().userId == existing().userId &&
+        incoming().createdAt == existing().createdAt;
+      allow delete: if isSignedIn() && isValidId(documentId) && existing().userId == request.auth.uid;
+    }
+
+    // Rules for Reminders collection
+    match /reminders/{reminderId} {
+      allow get: if isSignedIn() && isValidId(reminderId) && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(reminderId) && isValidReminder(incoming());
+      allow update: if isSignedIn() && isValidId(reminderId) && isValidReminder(incoming()) &&
+        existing().userId == request.auth.uid &&
+        incoming().userId == existing().userId;
+      allow delete: if isSignedIn() && isValidId(reminderId) && existing().userId == request.auth.uid;
+    }
+
+    // Rules for Comments collection (Interactive student inquiries on videos and documents)
+    match /comments/{commentId} {
+      allow get: if isValidId(commentId);
+      allow list: if true; // Public educational inquiries and questions reading
+      allow create: if isSignedIn() && isValidId(commentId) && isValidComment(incoming());
+      allow update: if isSignedIn() && isValidId(commentId) && (
+        (existing().userId == request.auth.uid && isValidComment(incoming()) && incoming().createdAt == existing().createdAt) ||
+        (incoming().diff(existing()).affectedKeys().hasOnly(['likesCount']) && incoming().likesCount is number)
+      );
+      allow delete: if isSignedIn() && isValidId(commentId) && existing().userId == request.auth.uid;
+    }
+
+    // Test connection doc for initial boot check
+    match /test/{docId} {
+      allow read: if true;
+    }
+  }
+}
