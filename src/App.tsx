@@ -28,6 +28,8 @@ import { PeoplePagesSearchModal } from './components/profile/PeoplePagesSearchMo
 import { QuizzesCatalogView } from './components/quizzes/QuizzesCatalogView';
 import { VideoService } from './services/videoService';
 import { QuizService } from './services/quizService';
+import { SupabaseConfigModal } from './components/supabase/SupabaseConfigModal';
+import { SupabaseService } from './services/supabase';
 
 export default function App() {
   // 1. Dark Mode State
@@ -106,6 +108,15 @@ export default function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isStudyProgressModalOpen, setIsStudyProgressModalOpen] = useState(false);
+  const [isSupabaseModalOpen, setIsSupabaseModalOpen] = useState(false);
+  const [isSupabaseConfigured, setIsSupabaseConfigured] = useState<boolean>(() => SupabaseService.isConfigured());
+
+  useEffect(() => {
+    const unsub = SupabaseService.subscribe(() => {
+      setIsSupabaseConfigured(SupabaseService.isConfigured());
+    });
+    return () => unsub();
+  }, []);
 
   // 5. Study Reminders & Alarms State
   const [reminders, setReminders] = useState<StudyReminder[]>(() => ReminderService.getReminders());
@@ -312,6 +323,8 @@ export default function App() {
           onOpenRemindersModal={handleOpenRemindersModal}
           onOpenPeopleSearch={() => setIsPeopleSearchOpen(true)}
           onOpenStudyProgress={() => setIsStudyProgressModalOpen(true)}
+          onOpenSupabaseModal={() => setIsSupabaseModalOpen(true)}
+          isSupabaseConfigured={isSupabaseConfigured}
           totalDocsCount={documents.length}
           activeRemindersCount={activeRemindersCount}
           currentUser={currentUser}
@@ -551,6 +564,15 @@ export default function App() {
       <StudyProgressModal
         isOpen={isStudyProgressModalOpen}
         onClose={() => setIsStudyProgressModalOpen(false)}
+      />
+
+      {/* Supabase Configuration & API Key Modal */}
+      <SupabaseConfigModal
+        isOpen={isSupabaseModalOpen}
+        onClose={() => setIsSupabaseModalOpen(false)}
+        onSuccess={() => {
+          showToast('تم حفظ وربط بيانات Supabase بنجاح! ⚡');
+        }}
       />
     </div>
   );

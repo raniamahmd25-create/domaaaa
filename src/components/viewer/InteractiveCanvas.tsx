@@ -570,11 +570,13 @@ export const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
             <span>✋ اسحب باليد يميناً أو يساراً 👈 👉 أو لأعلى ولأسفل 🔼 🔽 لتقليب الصفحة</span>
           </div>
         )}
-        {/* Base Document Image */}
+        {/* Base Document Image with instant async decoding */}
         <img
           src={page.imageUrl}
           alt={`الصفحة ${page.pageNumber}`}
-          className="w-full h-auto block pointer-events-none select-none"
+          loading="eager"
+          decoding="async"
+          className="w-full h-auto block pointer-events-none select-none transition-opacity duration-150"
           draggable={false}
         />
 

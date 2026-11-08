@@ -36,7 +36,8 @@ import {
   ChevronUp,
   ChevronDown,
   StickyNote,
-  MessageCircle
+  MessageCircle,
+  Search
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { AiTutorSidebar } from './AiTutorSidebar';
@@ -82,7 +83,11 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
   const [fontSize, setFontSize] = useState<number>(18);
   const [isBold, setIsBold] = useState<boolean>(true);
   const [zoom, setZoom] = useState<number>(1.0);
-  const [showThumbnails, setShowThumbnails] = useState<boolean>(false);
+  // Thumbnails sidebar is open immediately upon loading PDF
+  const [showThumbnails, setShowThumbnails] = useState<boolean>(true);
+  const [thumbnailSearch, setThumbnailSearch] = useState<string>('');
+  const [thumbnailFilterBookmarks, setThumbnailFilterBookmarks] = useState<boolean>(false);
+
   const [isExporting, setIsExporting] = useState<boolean>(false);
   const [isAutoSaved, setIsAutoSaved] = useState<boolean>(true);
   const [showExportMenu, setShowExportMenu] = useState<boolean>(false);
@@ -94,6 +99,30 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
   // Focus Mode State (وضع القراءة المركزة - تجربة تشبه الكتاب الورقي بدون تشتيت)
   const [focusMode, setFocusMode] = useState<boolean>(false);
   const [isCommentsOpen, setIsCommentsOpen] = useState<boolean>(false);
+
+  // Quick Page Jump State for 100-300 page books
+  const [jumpPageInput, setJumpPageInput] = useState<string>('');
+  const [isJumpOpen, setIsJumpOpen] = useState<boolean>(false);
+
+  const handleJumpToPage = (e: React.FormEvent) => {
+    e.preventDefault();
+    const num = parseInt(jumpPageInput.trim(), 10);
+    if (!isNaN(num) && num >= 1 && num <= currentDoc.pages.length) {
+      setCurrentPageIndex(num - 1);
+      setIsJumpOpen(false);
+      setJumpPageInput('');
+    }
+  };
+
+  // Auto-scroll the thumbnail sidebar to keep the active page thumbnail visible
+  useEffect(() => {
+    if (showThumbnails) {
+      const el = document.getElementById(`viewer-thumb-${currentPageIndex}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+  }, [currentPageIndex, showThumbnails]);
 
   // Exit focus mode with Escape key
   useEffect(() => {
@@ -143,7 +172,26 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
     setCurrentPageIndex(0);
     setUndoStack([]);
     setRedoStack([]);
+    setShowThumbnails(true); // Open thumbnail preview immediately upon loading
+    setThumbnailSearch('');
+    setThumbnailFilterBookmarks(false);
   }, [initialDocument.id]);
+
+  // Ultra-fast page preloading: preload next and previous pages in browser image cache
+  useEffect(() => {
+    if (!currentDoc?.pages) return;
+    const preloadIndices = [currentPageIndex + 1, currentPageIndex - 1, currentPageIndex + 2];
+    preloadIndices.forEach((idx) => {
+      if (idx >= 0 && idx < currentDoc.pages.length) {
+        const page = currentDoc.pages[idx];
+        if (page?.imageUrl) {
+          const img = new Image();
+          img.decoding = 'async';
+          img.src = page.imageUrl;
+        }
+      }
+    });
+  }, [currentPageIndex, currentDoc?.pages]);
 
   const activePage = currentDoc.pages[currentPageIndex] || currentDoc.pages[0];
   const subjectInfo = SUBJECTS.find((s) => s.id === currentDoc.subject) || SUBJECTS[0];
@@ -234,6 +282,20 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
     setCurrentDoc(updatedDoc);
     StorageService.saveDocument(updatedDoc);
   };
+
+  const displayedThumbnails = currentDoc.pages.filter((p) => {
+    if (thumbnailFilterBookmarks) {
+      if (!currentDoc.bookmarks?.includes(p.pageNumber)) return false;
+    }
+    if (thumbnailSearch.trim()) {
+      const q = thumbnailSearch.trim();
+      const num = parseInt(q, 10);
+      if (!isNaN(num)) {
+        return p.pageNumber === num;
+      }
+    }
+    return true;
+  });
 
   return (
     <div className="flex flex-col h-screen bg-slate-100 dark:bg-slate-950 overflow-hidden font-['Cairo',sans-serif] relative">
@@ -329,6 +391,24 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
           >
             <Bookmark className="w-4 h-4 fill-current" />
           </button>
+
+          {/* Toggle Thumbnails Sidebar Button */}
+          <button
+            type="button"
+            onClick={() => setShowThumbnails((prev) => !prev)}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+              showThumbnails
+                ? 'bg-amber-500 text-slate-950 font-black shadow-xs ring-2 ring-amber-400/50'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
+            }`}
+            title={showThumbnails ? 'إخفاء شريط الصفحات المصغرة' : 'إظهار شريط الصفحات المصغرة (Thumbnails)'}
+          >
+            <LayoutGrid className="w-4 h-4 stroke-[2.5]" />
+            <span className="hidden sm:inline">الصفحات المصغرة</span>
+            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/10 dark:bg-white/10 font-mono font-bold">
+              {currentDoc.pages.length}
+            </span>
+          </button>
         </div>
 
         {/* Page Switcher with Up/Down Gliders (تقلع وتنزل بسلاسة) */}
@@ -345,12 +425,44 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
             <span className="hidden sm:inline">أعلى 🔼</span>
           </button>
 
-          {/* Current Page Indicator */}
-          <div className="flex items-center gap-1 px-3 text-xs font-black text-slate-800 dark:text-slate-200">
-            <span>صفحة</span>
-            <span className="text-amber-600 dark:text-amber-400 font-extrabold text-sm">{currentPageIndex + 1}</span>
-            <span>من</span>
-            <span>{currentDoc.pages.length}</span>
+          {/* Current Page Indicator with Quick Jump */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setIsJumpOpen((prev) => !prev)}
+              className="flex items-center gap-1 px-2.5 py-1 text-xs font-black text-slate-800 dark:text-slate-200 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 rounded-lg transition cursor-pointer"
+              title="انقر للانتقال المباشر لأي صفحة في الكتاب"
+            >
+              <span>صفحة</span>
+              <span className="text-amber-600 dark:text-amber-400 font-extrabold text-sm">{currentPageIndex + 1}</span>
+              <span>من</span>
+              <span>{currentDoc.pages.length}</span>
+              <span className="text-[10px] text-slate-400">⚡</span>
+            </button>
+
+            {isJumpOpen && (
+              <form
+                onSubmit={handleJumpToPage}
+                className="absolute top-full mt-2 start-1/2 -translate-x-1/2 z-50 bg-white dark:bg-slate-800 p-2.5 rounded-2xl shadow-2xl border-2 border-amber-500 flex items-center gap-2 min-w-[210px] animate-in fade-in"
+              >
+                <input
+                  type="number"
+                  min={1}
+                  max={currentDoc.pages.length}
+                  value={jumpPageInput}
+                  onChange={(e) => setJumpPageInput(e.target.value)}
+                  placeholder={`1 - ${currentDoc.pages.length}`}
+                  autoFocus
+                  className="w-20 px-2.5 py-1 text-xs rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 font-bold text-center focus:ring-2 focus:ring-amber-500 focus:outline-none text-slate-900 dark:text-white"
+                />
+                <button
+                  type="submit"
+                  className="px-3 py-1 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs transition cursor-pointer"
+                >
+                  انتقال ⚡
+                </button>
+              </form>
+            )}
           </div>
 
           {/* Glide Down Button (تنزل لأسفل) */}
@@ -518,48 +630,144 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
       <main role="main" className="flex-1 flex overflow-hidden relative">
         {/* Thumbnails Sidebar */}
         {!focusMode && showThumbnails && (
-          <aside aria-label="شريط الصفحات المصغرة" className="w-60 bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 flex flex-col p-3 overflow-y-auto z-30 shadow-lg">
-            <div className="flex items-center justify-between pb-3 mb-2 border-b border-slate-100 dark:border-slate-800">
-              <span className="text-xs font-extrabold text-slate-800 dark:text-slate-200">
-                صفحات المستند ({currentDoc.pages.length})
-              </span>
+          <aside aria-label="شريط الصفحات المصغرة" className="w-64 sm:w-72 bg-white dark:bg-slate-900 border-e border-slate-200 dark:border-slate-800 flex flex-col z-30 shadow-xl shrink-0 select-none animate-in slide-in-from-right-3 duration-200">
+            {/* Header */}
+            <div className="p-3 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2 bg-slate-50 dark:bg-slate-900/90">
+              <div className="flex items-center gap-2">
+                <LayoutGrid className="w-4 h-4 text-amber-500 stroke-[2.5]" />
+                <span className="text-xs font-black text-slate-900 dark:text-white">
+                  معاينة الصفحات ({currentDoc.pages.length})
+                </span>
+              </div>
               <button
                 type="button"
                 onClick={() => setShowThumbnails(false)}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs"
+                className="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition text-xs cursor-pointer"
+                title="إخفاء الشريط الجانبي"
               >
                 ✕
               </button>
             </div>
 
-            <div className="grid grid-cols-1 gap-3">
-              {currentDoc.pages.map((p, index) => (
-                <div
-                  key={p.id}
-                  onClick={() => setCurrentPageIndex(index)}
-                  className={`group relative rounded-xl border-2 overflow-hidden cursor-pointer p-1 transition-all ${
-                    currentPageIndex === index
-                      ? 'border-amber-500 shadow-md ring-2 ring-amber-400/30'
-                      : 'border-slate-200 dark:border-slate-800 hover:border-slate-400'
-                  }`}
-                >
-                  <img
-                    src={p.imageUrl}
-                    alt={`صفحة ${p.pageNumber}`}
-                    className="w-full h-auto rounded bg-slate-50 dark:bg-slate-950 object-cover"
-                  />
-                  <div className="flex items-center justify-between mt-1 px-1 text-[11px] font-bold text-slate-600 dark:text-slate-300">
-                    <span>صفحة {p.pageNumber}</span>
-                    {p.annotations?.length > 0 && (
-                      <span className="text-[10px] text-amber-600 dark:text-amber-400">
-                        ({p.annotations.length} ملاحظة)
-                      </span>
-                    )}
-                  </div>
+            {/* Quick Search & Bookmark Filter inside Thumbnail Sidebar */}
+            <div className="p-2.5 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2 bg-white dark:bg-slate-900">
+              <div className="flex-1 flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-xl text-xs">
+                <Search className="w-3.5 h-3.5 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="ابحث برقم الصفحة..."
+                  value={thumbnailSearch}
+                  onChange={(e) => setThumbnailSearch(e.target.value)}
+                  className="w-full bg-transparent text-slate-900 dark:text-white text-xs focus:outline-none font-bold"
+                />
+                {thumbnailSearch && (
+                  <button type="button" onClick={() => setThumbnailSearch('')} className="text-slate-400 text-xs cursor-pointer">✕</button>
+                )}
+              </div>
+
+              {/* Bookmark Filter Toggle */}
+              <button
+                type="button"
+                onClick={() => setThumbnailFilterBookmarks((prev) => !prev)}
+                className={`p-1.5 rounded-xl border transition cursor-pointer ${
+                  thumbnailFilterBookmarks
+                    ? 'bg-amber-500 text-slate-950 border-amber-500'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-400 border-slate-200 dark:border-slate-700'
+                }`}
+                title="عرض الصفحات المميزة بعلامة مرجعية فقط"
+              >
+                <Bookmark className="w-3.5 h-3.5 fill-current" />
+              </button>
+            </div>
+
+            {/* Thumbnails Grid List */}
+            <div className="flex-1 overflow-y-auto p-3 space-y-3">
+              {displayedThumbnails.length === 0 ? (
+                <div className="text-center py-8 text-xs text-slate-400 font-bold">
+                  لا توجد صفحات مطابقة للبحث
                 </div>
-              ))}
+              ) : (
+                displayedThumbnails.map((p) => {
+                  const actualIndex = currentDoc.pages.findIndex((item) => item.id === p.id);
+                  const isActive = currentPageIndex === actualIndex;
+                  const isBookmarked = currentDoc.bookmarks?.includes(p.pageNumber);
+                  const annotationsCount = p.annotations?.length || 0;
+
+                  return (
+                    <div
+                      key={p.id}
+                      id={`viewer-thumb-${actualIndex}`}
+                      onClick={() => setCurrentPageIndex(actualIndex)}
+                      className={`group relative rounded-2xl border-2 overflow-hidden cursor-pointer p-1.5 transition-all ${
+                        isActive
+                          ? 'border-amber-500 bg-amber-50/50 dark:bg-amber-950/20 shadow-lg ring-3 ring-amber-400/40 scale-[1.02]'
+                          : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/40 hover:border-amber-300 dark:hover:border-slate-700 hover:shadow-md'
+                      }`}
+                    >
+                      {/* Thumbnail Image Container */}
+                      <div className="relative aspect-[3/4] w-full rounded-xl overflow-hidden bg-white dark:bg-slate-950 flex items-center justify-center border border-slate-200 dark:border-slate-800">
+                        <img
+                          src={p.imageUrl}
+                          alt={`صفحة ${p.pageNumber}`}
+                          className="w-full h-full object-contain"
+                          loading="lazy"
+                        />
+                        {/* Active Indicator Badge */}
+                        {isActive && (
+                          <div className="absolute top-1.5 start-1.5 px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 text-[10px] font-black shadow-md flex items-center gap-1">
+                            <span>الحالية</span>
+                          </div>
+                        )}
+                        {/* Bookmark Badge */}
+                        {isBookmarked && (
+                          <div className="absolute top-1.5 end-1.5 p-1 rounded-full bg-amber-500 text-slate-950 shadow-md">
+                            <Bookmark className="w-3 h-3 fill-current" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Meta Footer */}
+                      <div className="flex items-center justify-between mt-1.5 px-1 text-[11px] font-extrabold text-slate-700 dark:text-slate-300">
+                        <span className={isActive ? 'text-amber-600 dark:text-amber-400 font-black' : ''}>
+                          صفحة {p.pageNumber}
+                        </span>
+                        {annotationsCount > 0 && (
+                          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300 font-bold">
+                            {annotationsCount} ملاحظة ✍️
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Sidebar Bottom Action */}
+            <div className="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/90 flex items-center justify-between gap-2">
+              <button
+                type="button"
+                onClick={handleAddBlankPage}
+                className="w-full py-2 px-3 rounded-xl bg-white dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-slate-200 dark:border-slate-700 font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
+              >
+                <Plus className="w-4 h-4 stroke-[2.5]" />
+                <span>إضافة صفحة كشكول للمذكرة</span>
+              </button>
             </div>
           </aside>
+        )}
+
+        {/* Floating Open Sidebar Button when collapsed */}
+        {!focusMode && !showThumbnails && (
+          <button
+            type="button"
+            onClick={() => setShowThumbnails(true)}
+            className="absolute top-4 start-4 z-30 flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-2xl border-2 border-amber-500 text-slate-950 dark:text-white text-xs font-black hover:bg-amber-500 hover:text-slate-950 transition cursor-pointer select-none"
+            title="إظهار شريط الصفحات المصغرة (Thumbnails)"
+          >
+            <LayoutGrid className="w-4 h-4 text-amber-500" />
+            <span>عرض الصفحات ({currentDoc.pages.length})</span>
+          </button>
         )}
 
         {/* Interactive Drawing & Reading Surface (يدعم وضع القراءة المريح Sepia) */}
@@ -659,21 +867,77 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
       {/* 4. Bottom Page Tabs Bar (مخفي في وضع التركيز) */}
       {!focusMode && (
         <nav aria-label="التنقل السريع بين صفحات المستند" className="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 px-3 py-1.5 flex items-center gap-1.5 overflow-x-auto text-xs font-bold select-none no-scrollbar">
-          <span className="text-[11px] text-slate-400 font-semibold px-2 shrink-0">التنقل السريع بين الصفحات:</span>
-          {currentDoc.pages.map((p, idx) => (
-            <button
-              key={p.id}
-              type="button"
-              onClick={() => setCurrentPageIndex(idx)}
-              className={`px-3 py-1 rounded-lg shrink-0 transition-all ${
-                currentPageIndex === idx
-                  ? 'bg-amber-500 text-slate-950 font-black shadow-xs'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-              }`}
-            >
-              صفحة {p.pageNumber}
-            </button>
-          ))}
+          <span className="text-[11px] text-slate-400 font-semibold px-2 shrink-0">التنقل السريع ({currentDoc.pages.length} صفحة):</span>
+          {currentDoc.pages.length <= 25 ? (
+            currentDoc.pages.map((p, idx) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => setCurrentPageIndex(idx)}
+                className={`px-3 py-1 rounded-lg shrink-0 transition-all ${
+                  currentPageIndex === idx
+                    ? 'bg-amber-500 text-slate-950 font-black shadow-xs'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                }`}
+              >
+                صفحة {p.pageNumber}
+              </button>
+            ))
+          ) : (
+            <>
+              {/* First Page */}
+              <button
+                type="button"
+                onClick={() => setCurrentPageIndex(0)}
+                className={`px-3 py-1 rounded-lg shrink-0 transition-all ${
+                  currentPageIndex === 0
+                    ? 'bg-amber-500 text-slate-950 font-black shadow-xs'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
+                }`}
+              >
+                صفحة 1
+              </button>
+
+              {currentPageIndex > 4 && <span className="text-slate-400 px-1">...</span>}
+
+              {/* Window around current page */}
+              {Array.from({ length: 9 }).map((_, offset) => {
+                const targetIdx = currentPageIndex - 4 + offset;
+                if (targetIdx <= 0 || targetIdx >= currentDoc.pages.length - 1) return null;
+                const p = currentDoc.pages[targetIdx];
+                if (!p) return null;
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => setCurrentPageIndex(targetIdx)}
+                    className={`px-3 py-1 rounded-lg shrink-0 transition-all ${
+                      currentPageIndex === targetIdx
+                        ? 'bg-amber-500 text-slate-950 font-black shadow-xs'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
+                    }`}
+                  >
+                    صفحة {p.pageNumber}
+                  </button>
+                );
+              })}
+
+              {currentPageIndex < currentDoc.pages.length - 5 && <span className="text-slate-400 px-1">...</span>}
+
+              {/* Last Page */}
+              <button
+                type="button"
+                onClick={() => setCurrentPageIndex(currentDoc.pages.length - 1)}
+                className={`px-3 py-1 rounded-lg shrink-0 transition-all ${
+                  currentPageIndex === currentDoc.pages.length - 1
+                    ? 'bg-amber-500 text-slate-950 font-black shadow-xs'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
+                }`}
+              >
+                صفحة {currentDoc.pages.length}
+              </button>
+            </>
+          )}
         </nav>
       )}
 
