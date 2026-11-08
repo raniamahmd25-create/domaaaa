@@ -20,6 +20,8 @@ import { VideoItem, VideoType, SUBJECTS, SubjectId } from '../../types';
 import { VideoService } from '../../services/videoService';
 import { StorageService } from '../../services/storage';
 import { auth } from '../../services/firebase';
+import { storeVideoBlob } from '../../services/videoStorage';
+import { captureVideoThumbnail } from '../../services/videoThumbnail';
 import confetti from 'canvas-confetti';
 
 interface PublishVideoModalProps {
@@ -76,12 +78,14 @@ export const PublishVideoModal: React.FC<PublishVideoModalProps> = ({
 
   // Preview & Metadata state
   const [videoBlobUrl, setVideoBlobUrl] = useState<string | null>(null);
+  const [thumbnailUrl, setThumbnailUrl] = useState<string>('');
   const [detectedDuration, setDetectedDuration] = useState<number>(0);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [subject, setSubject] = useState<SubjectId>('arabic');
   const [grade, setGrade] = useState('الصف الخامس الابتدائي');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const currentVideoBlobRef = useRef<Blob | null>(null);
 
   const videoElementRef = useRef<HTMLVideoElement>(null);
   const previewVideoRef = useRef<HTMLVideoElement>(null);
@@ -165,6 +169,24 @@ export const PublishVideoModal: React.FC<PublishVideoModalProps> = ({
     }
   };
 
+  // Detect best supported recording MIME type
+  const getSupportedRecordingMimeType = (): string => {
+    const candidates = [
+      'video/mp4;codecs=avc1',
+      'video/mp4',
+      'video/webm;codecs=h264,opus',
+      'video/webm;codecs=vp8,opus',
+      'video/webm;codecs=vp9,opus',
+      'video/webm',
+    ];
+    for (const mime of candidates) {
+      if (typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported(mime)) {
+        return mime;
+      }
+    }
+    return '';
+  };
+
   // Start recording video
   const startRecording = () => {
     if (!stream) return;
@@ -172,10 +194,10 @@ export const PublishVideoModal: React.FC<PublishVideoModalProps> = ({
     setRecordingSeconds(0);
 
     try {
-      const options = { mimeType: 'video/webm;codecs=vp9,opus' };
+      const mimeType = getSupportedRecordingMimeType();
       let recorder: MediaRecorder;
-      if (MediaRecorder.isTypeSupported(options.mimeType)) {
-        recorder = new MediaRecorder(stream, options);
+      if (mimeType) {
+        recorder = new MediaRecorder(stream, { mimeType });
       } else {
         recorder = new MediaRecorder(stream);
       }
@@ -186,10 +208,22 @@ export const PublishVideoModal: React.FC<PublishVideoModalProps> = ({
         }
       };
 
-      recorder.onstop = () => {
-        const blob = new Blob(recordedChunksRef.current, { type: 'video/mp4' });
+      recorder.onstop = async () => {
+        // Use the ACTUAL recorder MIME type to prevent container corruption
+        const actualMime = recorder.mimeType || mimeType || 'video/webm';
+        const blob = new Blob(recordedChunksRef.current, { type: actualMime });
+        currentVideoBlobRef.current = blob;
         const url = URL.createObjectURL(blob);
         setVideoBlobUrl(url);
+
+        // Auto extract high quality thumbnail poster immediately so it's never black
+        try {
+          const thumb = await captureVideoThumbnail(blob, title || 'فيديو Shorts جديد', 'الصف الخامس');
+          setThumbnailUrl(thumb);
+        } catch (e) {
+          console.warn('Thumbnail generation notice:', e);
+        }
+
         const duration = recordingSeconds || 15;
         setDetectedDuration(duration);
         if (!hasUserSelectedType) {
@@ -221,13 +255,26 @@ export const PublishVideoModal: React.FC<PublishVideoModalProps> = ({
     }
   };
 
-  // Handle local video file upload
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle local video/media file upload
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    currentVideoBlobRef.current = file;
     const url = URL.createObjectURL(file);
     setVideoBlobUrl(url);
+
+    if (!title) {
+      setTitle(file.name.replace(/\.[^/.]+$/, '').replace(/[_-]/g, ' '));
+    }
+
+    // Auto extract first-frame thumbnail immediately to prevent black screen
+    try {
+      const thumb = await captureVideoThumbnail(file, file.name, 'الصف الخامس');
+      setThumbnailUrl(thumb);
+    } catch (e) {
+      console.warn('Thumbnail generation notice for uploaded file:', e);
+    }
 
     // Create a temporary video element to measure duration
     const tempVideo = document.createElement('video');
@@ -250,11 +297,20 @@ export const PublishVideoModal: React.FC<PublishVideoModalProps> = ({
   };
 
   // Save video
-  const handlePublish = () => {
+  const handlePublish = async () => {
     if (!videoBlobUrl || !title.trim()) return;
 
     setIsSubmitting(true);
     const videoId = 'vid_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
+
+    // Save binary Blob into IndexedDB so it never expires on page refresh
+    if (currentVideoBlobRef.current) {
+      try {
+        await storeVideoBlob(videoId, currentVideoBlobRef.current);
+      } catch (err) {
+        console.warn('IndexedDB video storage note:', err);
+      }
+    }
 
     // Explicit user choice from the two buttons (shorts vs lesson)
     const finalType: VideoType = selectedType;
@@ -264,6 +320,7 @@ export const PublishVideoModal: React.FC<PublishVideoModalProps> = ({
       title: title.trim(),
       description: description.trim(),
       videoUrl: videoBlobUrl,
+      thumbnailUrl: thumbnailUrl || '',
       durationSeconds: detectedDuration || (selectedType === 'shorts' ? 45 : 300),
       type: finalType,
       subject,
