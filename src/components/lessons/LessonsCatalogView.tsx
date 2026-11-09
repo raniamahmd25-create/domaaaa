@@ -20,6 +20,7 @@ import {
 import { VideoItem, SUBJECTS } from '../../types';
 import { VideoService } from '../../services/videoService';
 import { StorageService } from '../../services/storage';
+import { resolveVideoUrl } from '../../services/videoStorage';
 import { InteractiveCommentsSection } from '../comments/InteractiveCommentsSection';
 import confetti from 'canvas-confetti';
 
@@ -34,8 +35,23 @@ export const LessonsCatalogView: React.FC<LessonsCatalogViewProps> = ({
 }) => {
   const [lessons, setLessons] = useState<VideoItem[]>(() => VideoService.getLessons());
   const [activePlayingLesson, setActivePlayingLesson] = useState<VideoItem | null>(null);
+  const [modalVideoUrl, setModalVideoUrl] = useState<string>('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [confirmDeleteLessonId, setConfirmDeleteLessonId] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    if (activePlayingLesson) {
+      resolveVideoUrl(activePlayingLesson).then((url) => {
+        if (active) setModalVideoUrl(url || activePlayingLesson.videoUrl);
+      });
+    } else {
+      setModalVideoUrl('');
+    }
+    return () => {
+      active = false;
+    };
+  }, [activePlayingLesson]);
 
   useEffect(() => {
     const unsubscribe = VideoService.subscribe(() => {
@@ -167,11 +183,21 @@ export const LessonsCatalogView: React.FC<LessonsCatalogViewProps> = ({
               className="group bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col justify-between"
             >
               {/* Thumbnail Container */}
-              <div className="relative aspect-video bg-black overflow-hidden flex items-center justify-center">
-                <video
-                  src={lesson.videoUrl}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
+              <div className="relative aspect-video bg-slate-950 overflow-hidden flex items-center justify-center">
+                {lesson.thumbnailUrl ? (
+                  <img
+                    src={lesson.thumbnailUrl}
+                    alt={lesson.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                ) : (
+                  <video
+                    src={lesson.videoUrl}
+                    preload="metadata"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                )}
 
                 <div className="absolute inset-0 bg-black/25 group-hover:bg-black/10 transition-colors flex items-center justify-center">
                   <div className="w-12 h-12 rounded-full bg-white/30 backdrop-blur-md flex items-center justify-center text-white shadow-xl group-hover:scale-110 transition">
@@ -309,10 +335,12 @@ export const LessonsCatalogView: React.FC<LessonsCatalogViewProps> = ({
             {/* Modal Video Player */}
             <div className="relative aspect-video bg-black">
               <video
-                src={activePlayingLesson.videoUrl}
+                src={modalVideoUrl || activePlayingLesson.videoUrl}
+                poster={activePlayingLesson.thumbnailUrl || undefined}
                 controls
                 autoPlay
                 playsInline
+                preload="auto"
                 className="w-full h-full object-contain"
               />
             </div>

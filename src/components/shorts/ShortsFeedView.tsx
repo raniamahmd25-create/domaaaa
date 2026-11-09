@@ -21,6 +21,7 @@ import {
 import { VideoItem } from '../../types';
 import { VideoService } from '../../services/videoService';
 import { StorageService } from '../../services/storage';
+import { resolveVideoUrl } from '../../services/videoStorage';
 import { InteractiveCommentsSection } from '../comments/InteractiveCommentsSection';
 import confetti from 'canvas-confetti';
 
@@ -40,8 +41,23 @@ export const ShortsFeedView: React.FC<ShortsFeedViewProps> = ({
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [isCommentsOpen, setIsCommentsOpen] = useState<boolean>(false);
+  const [activeUrl, setActiveUrl] = useState<string>('');
 
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+
+  // Resolve active short video URL (restores from IndexedDB if necessary)
+  const currentShort = shorts[currentIndex];
+  useEffect(() => {
+    let active = true;
+    if (currentShort) {
+      resolveVideoUrl(currentShort).then((url) => {
+        if (active) setActiveUrl(url || currentShort.videoUrl);
+      });
+    }
+    return () => {
+      active = false;
+    };
+  }, [currentShort?.id, currentShort?.videoUrl]);
 
   // Subscribe to live video updates
   useEffect(() => {
@@ -145,7 +161,6 @@ export const ShortsFeedView: React.FC<ShortsFeedViewProps> = ({
     );
   }
 
-  const currentShort = shorts[currentIndex];
   const isSubscribedToAuthor = StorageService.isSubscribed(currentShort?.author || '');
 
   return (
@@ -153,13 +168,16 @@ export const ShortsFeedView: React.FC<ShortsFeedViewProps> = ({
       {/* Video Container (Vertical aspect ratio like TikTok / Shorts) */}
       <div className="relative h-full aspect-[9/16] max-w-md w-full bg-slate-950 flex items-center justify-center overflow-hidden">
         <video
+          key={currentShort.id}
           ref={(el) => {
             videoRefs.current[currentIndex] = el;
           }}
-          src={currentShort.videoUrl}
+          src={activeUrl || currentShort.videoUrl}
+          poster={currentShort.thumbnailUrl || undefined}
           autoPlay
           loop
           playsInline
+          preload="auto"
           muted={isMuted}
           onClick={togglePlayPause}
           className="w-full h-full object-cover cursor-pointer"
@@ -169,10 +187,10 @@ export const ShortsFeedView: React.FC<ShortsFeedViewProps> = ({
         {!isPlaying && (
           <div 
             onClick={togglePlayPause}
-            className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-2xs cursor-pointer"
+            className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-2xs cursor-pointer z-10"
           >
-            <div className="w-16 h-16 rounded-full bg-white/30 backdrop-blur-md flex items-center justify-center text-white shadow-xl">
-              <Play className="w-8 h-8 fill-white ml-1" />
+            <div className="w-20 h-20 rounded-full bg-white/30 backdrop-blur-md flex items-center justify-center text-white shadow-2xl hover:scale-105 transition">
+              <Play className="w-10 h-10 fill-white ml-1" />
             </div>
           </div>
         )}

@@ -120,8 +120,13 @@ export async function deleteVideoBlob(videoId: string): Promise<void> {
 export async function resolveVideoUrl(video: VideoItem): Promise<string> {
   if (!video) return '';
 
-  // 1. If it's already a regular HTTP / HTTPS URL (like demo videos) or Data URL, use directly
-  if (video.videoUrl.startsWith('http://') || video.videoUrl.startsWith('https://') || video.videoUrl.startsWith('data:')) {
+  // 1. If it's already a regular HTTP / HTTPS URL, relative URL (/videos/...) or Data URL, use directly
+  if (
+    video.videoUrl.startsWith('http://') ||
+    video.videoUrl.startsWith('https://') ||
+    video.videoUrl.startsWith('/') ||
+    video.videoUrl.startsWith('data:')
+  ) {
     return video.videoUrl;
   }
 

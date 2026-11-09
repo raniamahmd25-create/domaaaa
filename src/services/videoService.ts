@@ -12,8 +12,8 @@ export const DEMO_VIDEOS: VideoItem[] = [
     id: 'demo_short_01',
     title: 'مراجعة سريعة: كان وأخواتها في 45 ثانية ⚡',
     description: 'درس تجريبي سريع: تعرف على كان وأخواتها وأثرها على المبتدأ والخبر بطريقة سريعة ومبسطة.',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-    thumbnailUrl: '',
+    videoUrl: '/videos/demo_short.mp4',
+    thumbnailUrl: '/videos/demo_short_thumb.jpg',
     durationSeconds: 45, // Shorts (<= 180s)
     type: 'shorts',
     subject: 'arabic',
@@ -34,9 +34,9 @@ export const DEMO_VIDEOS: VideoItem[] = [
     id: 'demo_lesson_01',
     title: 'شرح كامل: القواعد النحوية ومراجعة ليلة الامتحان 📖',
     description: 'درس تجريبي كامل وشامل: شرح كافة دروس النحو المقررة وحل التدريبات والأنشطة النموذجية خطوة بخطوة.',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-    thumbnailUrl: '',
-    durationSeconds: 596, // Lesson (> 180s)
+    videoUrl: '/videos/demo_lesson.mp4',
+    thumbnailUrl: '/videos/demo_lesson_thumb.jpg',
+    durationSeconds: 305, // Lesson (> 180s)
     type: 'lesson',
     subject: 'arabic',
     grade: 'الصف الخامس الابتدائي',
@@ -66,6 +66,26 @@ if (typeof window !== 'undefined') {
         if (Array.isArray(parsed)) list = parsed;
       } catch {}
     }
+
+    // Auto-migrate any old broken Google Cloud Storage 403 URLs to the working local video assets
+    list = list.map((v) => {
+      if (v.id === 'demo_short_01' || v.videoUrl?.includes('gtv-videos-bucket') || v.videoUrl?.includes('ForBiggerBlazes')) {
+        return {
+          ...DEMO_VIDEOS[0],
+          likesCount: v.likesCount || 0,
+          likedByUser: v.likedByUser || false,
+        };
+      }
+      if (v.id === 'demo_lesson_01' || v.videoUrl?.includes('BigBuckBunny')) {
+        return {
+          ...DEMO_VIDEOS[1],
+          likesCount: v.likesCount || 0,
+          likedByUser: v.likedByUser || false,
+        };
+      }
+      return v;
+    });
+
     const hasShort = list.some((v) => v.type === 'shorts');
     const hasLesson = list.some((v) => v.type === 'lesson');
     if (!hasShort) {

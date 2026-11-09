@@ -149,6 +149,17 @@ export const SupabaseConfigModal: React.FC<SupabaseConfigModalProps> = ({
             )}
           </div>
 
+          {/* Source Link Guidance Pill */}
+          <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-xs text-emerald-900 dark:text-emerald-200 space-y-1">
+            <div className="font-black flex items-center gap-1.5 text-emerald-800 dark:text-emerald-300">
+              <Globe className="w-3.5 h-3.5" />
+              <span>المصدر: Supabase (supabase.com)</span>
+            </div>
+            <p className="text-[11px] leading-relaxed text-slate-600 dark:text-slate-300">
+              الرابط المشترك <code>https://share.google/C5WulQp7S4KiKNx3y</code> يوجه إلى موقع <strong>Supabase</strong> الرسمي. لربط وتفعيل قاعدة بياناتك الخاصة، انسخ <strong>Project URL</strong> ومفتاح <strong>anon key</strong> من مشروعك وضعهما بالأسفل:
+            </p>
+          </div>
+
           {/* Feedback Message */}
           {statusMessage && (
             <div

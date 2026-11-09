@@ -27,8 +27,8 @@ interface HomeViewProps {
   onOpenPublishModal: () => void;
   onOpenDocument: (doc: StudyDocument) => void;
   documents: StudyDocument[];
-  currentUser: User | null;
-  onSignIn: () => void;
+  currentUser?: User | null;
+  onSignIn?: () => void;
   onSelectSubject?: (subjectId: SubjectId) => void;
   onOpenStudyProgress?: () => void;
   onOpenReminders?: () => void;
@@ -101,81 +101,65 @@ export const HomeView: React.FC<HomeViewProps> = ({
         </div>
       </section>
 
-      {/* 2. Login & Cloud Sync Callout Banner (إذا لم يسجل الدخول) */}
-      {!currentUser ? (
-        <section className="bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-500/10 dark:from-amber-950/40 dark:via-orange-950/30 dark:to-amber-950/40 rounded-3xl p-6 sm:p-8 border border-amber-300/60 dark:border-amber-700/50 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-amber-500 text-slate-950 flex items-center justify-center font-black shrink-0 shadow-md">
-              <LogIn className="w-7 h-7 stroke-[2.5]" />
-            </div>
-            <div>
-              <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
-                سجّل دخولك الآن عبر حساب Google أو البريد الإلكتروني 🔑
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium mt-1">
-                احفظ تقدمك في المذاكرة، احتفظ بدرجاتك في الاختبارات التفاعلية، وتابع معلميك المفضلين ومذكراتهم السحابية فور نشرها.
-              </p>
-            </div>
+      {/* 2. Educational Dashboard Banner (متاح بالكامل لجميع الطلاب دون أي تسجيل دخول) */}
+      <section className="bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-500/15 dark:from-amber-950/40 dark:via-orange-950/30 dark:to-amber-950/40 rounded-3xl p-6 sm:p-7 border border-amber-300/70 dark:border-amber-700/60 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 flex items-center justify-center font-black shrink-0 shadow-md">
+            <GraduationCap className="w-7 h-7 stroke-[2.5]" />
           </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
+                مرحباً بك في منصة قلمي التعليمية - الصف الخامس الابتدائي 🌟
+              </h3>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 font-black border border-emerald-300 dark:border-emerald-800">
+                مفتوح بالكامل مجاناً
+              </span>
+            </div>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium mt-1 leading-relaxed">
+              تصفح وحل مذكرات وامتحانات الصف الخامس، شاهد شروحات الفيديو التفاعلية، واستخدم القلم الإلكتروني الذكي مباشرة دون الحاجة لأي تسجيل دخول.
+            </p>
+          </div>
+        </div>
 
-          <div className="flex items-center gap-3 shrink-0 w-full md:w-auto">
+        <div className="flex items-center gap-2.5 shrink-0 w-full md:w-auto">
+          <button
+            type="button"
+            onClick={() => onNavigateTab('documents')}
+            className="flex-1 md:flex-none px-5 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs sm:text-sm shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
+          >
+            <BookOpen className="w-4 h-4 stroke-[2.5]" />
+            <span>تصفح المذكرات</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => onNavigateTab('shorts')}
+            className="flex-1 md:flex-none px-4 py-2.5 rounded-2xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs sm:text-sm border border-slate-200 dark:border-slate-700 shadow-xs transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
+          >
+            <span>شاهد Shorts 🎬</span>
+          </button>
+          {onOpenStudyProgress && (
             <button
               type="button"
-              onClick={onSignIn}
-              className="flex-1 md:flex-none px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 font-black text-xs sm:text-sm shadow-md transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+              onClick={onOpenStudyProgress}
+              className="px-3.5 py-2.5 rounded-2xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-slate-700 transition flex items-center gap-1.5 cursor-pointer"
             >
-              <LogIn className="w-4 h-4 stroke-[2.5]" />
-              <span>تسجيل الدخول / إنشاء حساب</span>
+              <BarChart3 className="w-3.5 h-3.5 text-amber-500" />
+              <span>معدل تقدمي</span>
             </button>
-          </div>
-        </section>
-      ) : (
-        <section className="bg-white dark:bg-[#0c1222] rounded-3xl p-5 sm:p-6 border border-slate-200 dark:border-[#1a233a] shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-amber-500 text-slate-950 flex items-center justify-center font-black text-base shadow-sm">
-              <UserIcon className="w-6 h-6" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-slate-500 dark:text-slate-400">مرحباً بك مجدداً:</span>
-                <span className="font-black text-slate-900 dark:text-white text-base">
-                  {currentUser.displayName || 'طالب متميز'}
-                </span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-[#06241b] dark:text-[#34d399] font-bold border border-emerald-300 dark:border-[#0d4a36]">
-                  متصل سحابياً ✓
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-                مذكراتك وملاحظاتك واختباراتك محفوظة في حسابك السحابي بأمان.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2.5">
-            {onOpenStudyProgress && (
-              <button
-                type="button"
-                onClick={onOpenStudyProgress}
-                className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#131b2e] dark:hover:bg-[#18233d] text-slate-800 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-[#1e2a45] transition flex items-center gap-1.5 cursor-pointer"
-              >
-                <BarChart3 className="w-3.5 h-3.5 text-amber-500" />
-                <span>معدل تقدمي</span>
-              </button>
-            )}
-
-            {onOpenReminders && (
-              <button
-                type="button"
-                onClick={onOpenReminders}
-                className="px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 dark:bg-[#251705] dark:hover:bg-[#332007] text-amber-900 dark:text-amber-300 text-xs font-bold border border-amber-200 dark:border-[#4d2800] transition flex items-center gap-1.5 cursor-pointer"
-              >
-                <Bell className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-                <span>منبهات المذاكرة</span>
-              </button>
-            )}
-          </div>
-        </section>
-      )}
+          )}
+          {onOpenReminders && (
+            <button
+              type="button"
+              onClick={onOpenReminders}
+              className="px-3.5 py-2.5 rounded-2xl bg-amber-50 hover:bg-amber-100 dark:bg-[#251705] dark:hover:bg-[#332007] text-amber-900 dark:text-amber-300 text-xs font-bold border border-amber-200 dark:border-[#4d2800] transition flex items-center gap-1.5 cursor-pointer"
+            >
+              <Bell className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+              <span>منبهات المذاكرة</span>
+            </button>
+          )}
+        </div>
+      </section>
 
       {/* 3. Main Sections Hub (بطاقات أقسام المنصة الأربعة) */}
       <section className="space-y-4">

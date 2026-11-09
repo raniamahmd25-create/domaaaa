@@ -11,8 +11,6 @@ import {
   User as UserIcon,
   BarChart3,
   Users,
-  LogIn,
-  LogOut,
   Database,
   Menu,
   X,
@@ -304,28 +302,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <span>نشر جديد</span>
                 </button>
 
-                {/* Sign In button if not authenticated */}
-                {!currentUser ? (
-                  <button
-                    type="button"
-                    onClick={onSignIn}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:scale-95 text-white text-[10px] sm:text-[11px] font-black shadow-xs transition cursor-pointer"
-                    title="تسجيل الدخول بحساب Google أو البريد الإلكتروني"
-                  >
-                    <LogIn className="w-3 h-3" />
-                    <span>تسجيل دخول 🔑</span>
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={onSignOut}
-                    className="flex items-center gap-1 px-2 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-950/70 text-rose-700 dark:text-rose-300 text-[10px] sm:text-[11px] font-bold border border-rose-200 dark:border-rose-900/50 transition cursor-pointer"
-                    title="تسجيل الخروج من الحساب"
-                  >
-                    <LogOut className="w-3 h-3" />
-                    <span className="hidden sm:inline">خروج</span>
-                  </button>
-                )}
 
                 {/* User Account / Profile Pill */}
                 <button
@@ -448,32 +424,19 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <span className="text-xs font-black block text-slate-900 dark:text-white">
                     {currentDisplayName}
                   </span>
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400">
-                    {currentUser ? 'حساب سحابي متصل' : 'حساب زائر محلي'}
+                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
+                    طالب نشط ✓
                   </span>
                 </div>
               </div>
 
-              {currentUser ? (
-                <button
-                  type="button"
-                  onClick={() => handleMobileAction(onSignOut)}
-                  className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 text-xs font-bold border border-rose-200 dark:border-rose-900/50 cursor-pointer"
-                  title="تسجيل الخروج"
-                >
-                  <LogOut className="w-3.5 h-3.5" />
-                  <span>خروج</span>
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => handleMobileAction(onSignIn)}
-                  className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-black shadow-xs cursor-pointer active:scale-95"
-                >
-                  <LogIn className="w-3.5 h-3.5" />
-                  <span>دخول 🔑</span>
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => handleMobileAction(onOpenProfile)}
+                className="px-2.5 py-1 rounded-xl bg-amber-500/15 text-amber-900 dark:text-amber-300 text-xs font-bold border border-amber-300/60 dark:border-amber-700/60 cursor-pointer"
+              >
+                تعديل الاسم
+              </button>
             </div>
 
             <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-200/60 dark:border-[#1f2937]">

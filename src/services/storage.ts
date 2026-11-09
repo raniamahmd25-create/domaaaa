@@ -9,6 +9,7 @@ import {
   isIndexedDBAvailable,
 } from './indexedDbService';
 import { saveDocumentToFirestore, deleteDocumentFromFirestore } from './firebase';
+import { SupabaseService } from './supabase';
 
 const STORAGE_KEYS = {
   DOCUMENTS: 'qalami_documents_v1',
@@ -452,6 +453,13 @@ export const StorageService = {
         // Safe fallback when unauthenticated or offline
       });
 
+      // 1.2 Sync document to Supabase cloud when configured
+      if (SupabaseService.isConfigured()) {
+        SupabaseService.syncDocument(doc).catch((err) => {
+          console.warn('Supabase document sync note:', err);
+        });
+      }
+
       // 2. Notify in-app subscribers immediately
       notifyListeners();
 
@@ -493,6 +501,9 @@ export const StorageService = {
     deleteDocumentFromFirestore(id).catch(() => {
       // Safe fallback when unauthenticated or offline
     });
+    if (SupabaseService.isConfigured()) {
+      SupabaseService.deleteDocument(id).catch(() => {});
+    }
     notifyListeners();
   },
 

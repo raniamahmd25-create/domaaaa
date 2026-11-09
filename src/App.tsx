@@ -329,8 +329,6 @@ export default function App() {
           activeRemindersCount={activeRemindersCount}
           currentUser={currentUser}
           activeProfile={activeProfile}
-          onSignIn={() => setIsAuthModalOpen(true)}
-          onSignOut={handleGoogleSignOut}
           onOpenProfile={() => setIsProfileModalOpen(true)}
           onOpenMyProfile={() => setViewingPublisherKey(activeProfile.id || activeProfile.name)}
           onOpenNotifications={() => setIsNotificationCenterOpen(true)}
@@ -368,7 +366,6 @@ export default function App() {
             onOpenDocument={handleOpenDocument}
             documents={documents}
             currentUser={currentUser}
-            onSignIn={() => setIsAuthModalOpen(true)}
             onSelectSubject={(subjId) => {
               setSelectedSubjectFilter(subjId);
               setActiveBottomTab('documents');

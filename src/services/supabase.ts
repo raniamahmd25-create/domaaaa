@@ -132,6 +132,120 @@ class SupabaseServiceClass {
     }
   }
 
+  public async syncDocument(doc: any): Promise<boolean> {
+    const client = this.getClient();
+    if (!client) return false;
+
+    try {
+      const payload = {
+        id: doc.id,
+        title: doc.title,
+        subject: doc.subject,
+        custom_subject_name: doc.customSubjectName || null,
+        doc_type: doc.docType,
+        format: doc.format,
+        grade: doc.grade,
+        term: doc.term,
+        author: doc.author,
+        description: doc.description || '',
+        tags: doc.tags || [],
+        pages: doc.pages || [],
+        user_id: doc.userId || 'guest_user',
+        updated_at: new Date().toISOString(),
+      };
+
+      const { error } = await client.from('study_documents').upsert(payload, { onConflict: 'id' });
+      if (error) {
+        console.warn('Supabase study_documents sync warning:', error.message);
+        return false;
+      }
+      return true;
+    } catch (e) {
+      console.warn('Supabase sync error:', e);
+      return false;
+    }
+  }
+
+  public async deleteDocument(docId: string): Promise<boolean> {
+    const client = this.getClient();
+    if (!client) return false;
+
+    try {
+      const { error } = await client.from('study_documents').delete().eq('id', docId);
+      if (error) {
+        console.warn('Supabase delete document warning:', error.message);
+        return false;
+      }
+      return true;
+    } catch (e) {
+      console.warn('Supabase delete error:', e);
+      return false;
+    }
+  }
+
+  public async fetchDocuments(): Promise<any[] | null> {
+    const client = this.getClient();
+    if (!client) return null;
+
+    try {
+      const { data, error } = await client
+        .from('study_documents')
+        .select('*')
+        .order('updated_at', { ascending: false });
+
+      if (error || !data) {
+        return null;
+      }
+
+      return data.map((item: any) => ({
+        id: item.id,
+        title: item.title,
+        subject: item.subject,
+        customSubjectName: item.custom_subject_name,
+        docType: item.doc_type,
+        format: item.format,
+        grade: item.grade,
+        term: item.term,
+        author: item.author,
+        description: item.description,
+        tags: item.tags,
+        pages: item.pages || [],
+        userId: item.user_id,
+        createdAt: item.created_at || new Date().toISOString(),
+        updatedAt: item.updated_at || new Date().toISOString(),
+      }));
+    } catch (e) {
+      console.warn('Supabase fetch error:', e);
+      return null;
+    }
+  }
+
+  public async syncVideo(video: any): Promise<boolean> {
+    const client = this.getClient();
+    if (!client) return false;
+
+    try {
+      const { error } = await client.from('videos').upsert({
+        id: video.id,
+        title: video.title,
+        description: video.description || '',
+        video_url: video.videoUrl,
+        thumbnail_url: video.thumbnailUrl || '',
+        duration_seconds: video.durationSeconds,
+        type: video.type,
+        subject: video.subject,
+        grade: video.grade,
+        author: video.author,
+        likes_count: video.likesCount || 0,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'id' });
+
+      return !error;
+    } catch {
+      return false;
+    }
+  }
+
   public clearConfig() {
     this.config = {
       url: '',
